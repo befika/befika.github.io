@@ -25,7 +25,7 @@ func TestChat(t *testing.T) {
 		io.WriteString(w, `{"candidates":[{"content":{"parts":[{"text":"hmm","thought":true},{"text":" Yes, 8+ years of Go. "}]}}]}`)
 	}))
 	defer upstream.Close()
-	geminiURL, apiKey = upstream.URL+"/models/", "test-key"
+	geminiURL = upstream.URL + "/models/"
 
 	do := func(method, body, origin, ip string) *httptest.ResponseRecorder {
 		req := httptest.NewRequest(method, "/api/chat", strings.NewReader(body))
@@ -36,6 +36,11 @@ func TestChat(t *testing.T) {
 		return rec
 	}
 	user := func(text string) string { return `{"messages":[{"role":"user","text":"` + text + `"}]}` }
+
+	if rec := do("POST", user("hi"), "", "9.9.9.9"); rec.Code != 500 || !strings.Contains(rec.Body.String(), "GEMINI_API_KEY") {
+		t.Errorf("missing key: %d %s", rec.Code, rec.Body)
+	}
+	apiKey = "test-key"
 
 	rec := do("POST", user("Go experience?"), allowedOrigin, "1.1.1.1")
 	if rec.Code != 200 || !strings.Contains(rec.Body.String(), `"reply":"Yes, 8+ years of Go."`) {

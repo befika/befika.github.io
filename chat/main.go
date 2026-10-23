@@ -52,7 +52,7 @@ type content struct {
 
 func main() {
 	if apiKey == "" {
-		log.Fatal("GEMINI_API_KEY is not set")
+		log.Print("warning: GEMINI_API_KEY is not set; /api/chat will answer 500")
 	}
 	http.HandleFunc("/api/chat", handleChat)
 	port := envOr("PORT", "3000")
@@ -78,6 +78,10 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if apiKey == "" {
+		writeError(w, http.StatusInternalServerError, "The assistant is not configured yet (GEMINI_API_KEY missing).")
+		return
+	}
 	if !allow(clientIP(r)) {
 		writeError(w, http.StatusTooManyRequests, "Too many questions in a short time. Please try again in a few minutes.")
 		return
