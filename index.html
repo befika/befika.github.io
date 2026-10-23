@@ -49,6 +49,23 @@
   /* Cursor spotlight */
   body::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background: radial-gradient(640px circle at var(--x, 15%) var(--y, 10%), rgba(56, 189, 248, .075), transparent 80%); }
+  /* Dot grid revealed only around the cursor */
+  body::after { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: radial-gradient(rgba(148, 163, 184, .38) 1px, transparent 1.5px) 0 0 / 24px 24px;
+    -webkit-mask: radial-gradient(240px circle at var(--x, -999px) var(--y, -999px), #000, transparent 75%);
+    mask: radial-gradient(240px circle at var(--x, -999px) var(--y, -999px), #000, transparent 75%); }
+
+  /* Motion */
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+  .side > div > *, .socials { animation: rise .8s cubic-bezier(.2, .7, .2, 1) both; }
+  .side > div > :nth-child(2) { animation-delay: .05s; }
+  .side > div > :nth-child(3) { animation-delay: .1s; }
+  .side > div > :nth-child(4) { animation-delay: .15s; }
+  .side > div > :nth-child(5) { animation-delay: .2s; }
+  .side > div > :nth-child(6) { animation-delay: .25s; }
+  .side > div > :nth-child(n+7), .socials { animation-delay: .3s; }
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .8s cubic-bezier(.2, .7, .2, 1), transform .8s cubic-bezier(.2, .7, .2, 1); }
+  .reveal.in { opacity: 1; transform: none; }
 
   /* Layout */
   .layout { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 0 var(--gutter); }
@@ -111,7 +128,7 @@
   /* Rows: experience + work */
   .rows > li { position: relative; display: grid; gap: 4px 24px; margin: 0 -20px 8px; padding: 20px; border-radius: 12px; transition: background .2s, opacity .2s, box-shadow .2s; }
   @media (min-width: 640px) { .rows > li { grid-template-columns: 112px 1fr; } }
-  .rows > li:hover { background: var(--hover); box-shadow: inset 0 1px 0 rgba(148, 163, 184, .1); }
+  .rows > li:hover { background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgba(103, 232, 249, .07), transparent 70%), var(--hover); box-shadow: inset 0 1px 0 rgba(148, 163, 184, .1); }
   @media (hover: hover) and (min-width: 1024px) { .rows:hover > li:not(:hover) { opacity: .5; } }
   .when { padding-top: 3px; color: var(--muted); font: 500 12px/1.8 var(--mono); letter-spacing: .06em; text-transform: uppercase; }
   .rows h3 { color: var(--strong); font-size: 16px; font-weight: 500; line-height: 1.45; transition: color .2s; }
@@ -168,6 +185,51 @@
   .colophon a { color: var(--text); }
   .colophon a:hover { color: var(--accent); }
 
+  /* Live system */
+  .lede { margin-bottom: 22px; }
+  .sys { padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: radial-gradient(rgba(148, 163, 184, .13) 1px, transparent 1px) 0 0 / 16px 16px, var(--panel); }
+  .flow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .node { position: relative; flex: 1 1 0; min-width: 0; padding: 11px 13px; border: 1px dashed rgba(148, 163, 184, .32); border-radius: 10px; background: rgba(10, 12, 16, .88); }
+  .node b { display: block; color: var(--strong); font: 600 13px var(--mono); }
+  .node small { display: block; overflow: hidden; color: var(--muted); font: 11px/1.6 var(--mono); white-space: nowrap; text-overflow: ellipsis; }
+  .wire { --wc: rgba(148, 163, 184, .45); display: none; }
+  @media (min-width: 640px) {
+    .flow { display: flex; align-items: center; gap: 0; }
+    .wire { display: block; flex: 0 0 20px; height: 1px; background: linear-gradient(90deg, var(--wc) 50%, transparent 0) 0 0 / 6px 1px repeat-x; }
+  }
+  @keyframes flow-x { to { background-position: 6px 0; } }
+  @keyframes glow { 50% { border-color: rgba(103, 232, 249, .75); box-shadow: 0 0 0 3px rgba(103, 232, 249, .08), 0 0 26px rgba(103, 232, 249, .14); } }
+  .sys.busy .wire { --wc: var(--accent); animation: flow-x .5s linear infinite; }
+  .sys.busy .node { animation: glow 1.4s ease-in-out infinite; animation-delay: calc(var(--i) * .18s); }
+  .console { margin-top: 14px; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: rgba(10, 12, 16, .9); font: 12.5px/1.65 var(--mono); }
+  .console-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 9px 10px 9px 14px; border-bottom: 1px solid var(--line); color: var(--muted); }
+  .led { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+  .led.ok { background: #34d399; box-shadow: 0 0 0 3px rgba(52, 211, 153, .15); }
+  .led.err { background: #f87171; }
+  .run { margin-left: auto; flex: none; height: 30px; padding: 0 12px; border: 1px solid rgba(103, 232, 249, .4); border-radius: 8px; background: var(--accent-soft); color: var(--accent); font: 600 12px var(--mono); cursor: pointer; }
+  .run:hover { background: rgba(103, 232, 249, .18); }
+  .run:disabled { opacity: .5; cursor: progress; }
+  .console pre { margin: 0; padding: 12px 14px; color: var(--text); font: inherit; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .console pre b { color: var(--accent); font-weight: 600; }
+  .res { padding: 12px 14px 14px; border-top: 1px solid var(--line); }
+  .res-status { color: #34d399; }
+  .res-status.err { color: #f87171; }
+  .res-body { display: -webkit-box; margin-top: 6px; overflow: hidden; color: var(--strong); font: 14px/1.6 var(--sans); -webkit-line-clamp: 4; -webkit-box-orient: vertical; }
+  .trace { display: grid; gap: 7px; margin-top: 14px; }
+  .trace li { display: grid; grid-template-columns: 92px 1fr 62px; align-items: center; gap: 10px; color: var(--muted); }
+  .track { position: relative; height: 8px; border-radius: 4px; background: rgba(148, 163, 184, .08); }
+  .span { position: absolute; top: 0; bottom: 0; min-width: 3px; border-radius: 4px; background: var(--accent); transform-origin: left; animation: grow .7s cubic-bezier(.2, .7, .2, 1) both; }
+  .trace li:nth-child(2) .span { background: #a78bfa; animation-delay: .1s; }
+  .trace li:nth-child(3) .span { background: #fbbf24; animation-delay: .2s; }
+  @keyframes grow { from { transform: scaleX(0); } }
+  .trace .ms { color: var(--strong); text-align: right; }
+  .trace-note { margin-top: 10px; color: var(--muted); font-size: 11.5px; }
+  @media (min-width: 1024px) and (max-height: 820px) {
+    .side { padding: 56px 0 32px; }
+    .ai-bar { margin-top: 24px; }
+    .toc { margin-top: 28px; }
+  }
+
   /* AI chat panel */
   .chat-fab { position: fixed; right: 16px; bottom: 16px; z-index: 40; display: inline-flex; align-items: center; gap: 8px; height: 46px; padding: 0 18px 0 14px; border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font: 600 14px var(--sans); cursor: pointer; box-shadow: 0 8px 28px rgba(0, 0, 0, .45); }
   .chat-fab[aria-expanded="true"] { display: none; }
@@ -214,7 +276,7 @@
       <h1><a href="/">Befikadu Shumet</a></h1>
       <p class="role">Senior Backend Engineer</p>
       <p class="tagline">I build Go microservices, payment systems and the cloud infrastructure that keeps them fast and reliable.</p>
-      <p class="status">Open to remote roles &amp; contracts</p>
+      <p class="status">Open to remote roles<span id="clock-wrap" hidden> · <time id="clock"></time> in Addis Ababa</span></p>
 
       <form class="ai-bar" id="ai-bar" role="search">
         <svg class="ic" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 16l.7 1.3L21 18l-1.3.7L19 20l-.7-1.3L17 18l1.3-.7z"/></svg>
@@ -230,6 +292,7 @@
       <nav class="toc" aria-label="Sections">
         <ul>
           <li><a href="#about"><span class="bar"></span>About</a></li>
+          <li><a href="#system"><span class="bar"></span>Live system</a></li>
           <li><a href="#experience"><span class="bar"></span>Experience</a></li>
           <li><a href="#work"><span class="bar"></span>Work</a></li>
           <li><a href="#contact"><span class="bar"></span>Contact</a></li>
@@ -261,6 +324,36 @@
         <li><b>Top Rated Plus</b><span>on Upwork</span></li>
         <li><b>2,400+</b><span>hours delivered</span></li>
       </ul>
+    </section>
+
+    <section id="system" aria-label="Live system">
+      <h2 class="sec-title">Live system</h2>
+      <p class="lede">This portfolio is a small production system. When you ask the AI something, the request goes from your browser through Vercel's edge to a <strong>Go service</strong> that validates and rate-limits it before calling <strong>Gemini</strong>. Send a real request and see where the time goes.</p>
+      <div class="sys" id="sys">
+        <div class="flow" aria-hidden="true">
+          <div class="node" style="--i:0"><b>browser</b><small>you</small></div>
+          <i class="wire"></i>
+          <div class="node" style="--i:1"><b>edge</b><small>Vercel · CORS</small></div>
+          <i class="wire"></i>
+          <div class="node" style="--i:2"><b>chat</b><small>Go service</small></div>
+          <i class="wire"></i>
+          <div class="node" style="--i:3"><b>model</b><small>Gemini</small></div>
+        </div>
+        <div class="console">
+          <div class="console-head">
+            <span class="led" id="led"></span><span id="health">GET /api/health</span>
+            <button class="run" type="button" id="run">Run request ▶</button>
+          </div>
+          <pre><b>POST</b> /api/chat
+{"messages":[{"role":"user","text":"<span id="demo-q">In one sentence, what does Befikadu do?</span>"}]}</pre>
+          <div class="res" id="res" aria-live="polite" hidden>
+            <p class="res-status" id="res-status"></p>
+            <p class="res-body" id="res-body"></p>
+            <ol class="trace" id="trace"></ol>
+            <p class="trace-note" id="trace-note"></p>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section id="experience" aria-label="Experience">
@@ -502,6 +595,12 @@
     addEventListener('pointermove', e => {
       root.setProperty('--x', e.clientX + 'px');
       root.setProperty('--y', e.clientY + 'px');
+      const row = e.target.closest?.('.rows > li');
+      if (row) {
+        const r = row.getBoundingClientRect();
+        row.style.setProperty('--mx', e.clientX - r.left + 'px');
+        row.style.setProperty('--my', e.clientY - r.top + 'px');
+      }
     }, { passive: true });
   }
 
@@ -513,9 +612,88 @@
   }, { rootMargin: '-25% 0px -65% 0px' });
   tocLinks.forEach(a => spy.observe(document.querySelector(a.hash)));
 
+  // Fade sections in as they scroll into view.
+  const reveal = new IntersectionObserver(entries => {
+    for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); reveal.unobserve(e.target); }
+  }, { rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('main > section').forEach(s => { s.classList.add('reveal'); reveal.observe(s); });
+
+  // Local time in Addis Ababa.
+  {
+    const clock = document.getElementById('clock');
+    const time = new Intl.DateTimeFormat('en-US', { timeZone: 'Africa/Addis_Ababa', hour: 'numeric', minute: '2-digit' });
+    const tick = () => { clock.textContent = time.format(new Date()); };
+    tick();
+    setInterval(tick, 30000);
+    document.getElementById('clock-wrap').hidden = false;
+  }
+
+  // Live system: health check, request trace and the diagram animation.
+  const API = 'https://befika-github-io.vercel.app/api';
+  const $ = id => document.getElementById(id);
+  const fmt = ms => ms < 1000 ? Math.round(ms) + ' ms' : (ms / 1000).toFixed(2) + ' s';
+
+  const showResult = (data, rtt) => {
+    $('res').hidden = false;
+    $('res-status').className = 'res-status' + (data.reply ? '' : ' err');
+    $('res-status').textContent = data.reply
+      ? `200 OK · ${fmt(rtt)}${data.trace ? ' · ' + data.trace.model : ''}`
+      : data.error || 'Request failed';
+    $('res-body').textContent = data.reply || '';
+    $('trace').replaceChildren();
+    $('trace-note').textContent = '';
+    if (!data.trace) return;
+    // Server and model times are measured in Go; the rest of the round trip is network + edge.
+    const T = rtt, S = Math.min(data.trace.server_ms, T), M = Math.min(data.trace.model_ms, S), net = (T - S) / 2;
+    for (const [name, at, ms] of [['round trip', 0, T], ['go service', net, S], ['gemini', net + (S - M) / 2, M]]) {
+      const li = document.createElement('li');
+      li.innerHTML = '<span></span><span class="track"><span class="span"></span></span><span class="ms"></span>';
+      li.children[0].textContent = name;
+      li.children[2].textContent = fmt(ms);
+      Object.assign(li.querySelector('.span').style, { left: at / T * 100 + '%', width: ms / T * 100 + '%' });
+      $('trace').append(li);
+    }
+    $('trace-note').textContent = `≈ ${fmt(T - S)} in network and edge · ${fmt(S - M)} in the Go handler itself`;
+  };
+
+  const callChat = async messages => {
+    $('sys').classList.add('busy');
+    const t0 = performance.now();
+    const data = await fetch(API + '/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages }),
+    }).then(r => r.json()).catch(() => ({}));
+    $('sys').classList.remove('busy');
+    showResult(data, performance.now() - t0);
+    return data;
+  };
+
+  {
+    const t0 = performance.now();
+    fetch(API + '/health').then(r => r.json()).then(h => {
+      $('led').className = 'led ' + (h.ok ? 'ok' : 'err');
+      $('health').textContent = `chat service ${h.ok ? 'operational' : 'not configured'} · ${fmt(performance.now() - t0)}`;
+    }).catch(() => {
+      $('led').className = 'led err';
+      $('health').textContent = 'chat service unreachable';
+    });
+  }
+
+  $('run').addEventListener('click', async () => {
+    $('run').disabled = true;
+    $('res').hidden = false;
+    $('res-status').className = 'res-status';
+    $('res-status').textContent = 'sending…';
+    $('res-body').textContent = '';
+    $('trace').replaceChildren();
+    $('trace-note').textContent = '';
+    await callChat([{ role: 'user', text: $('demo-q').textContent }]);
+    $('run').disabled = false;
+  });
+
   // "Ask my AI" chat. Backend: chat/main.go, deployed on Vercel.
   {
-    const CHAT_API = 'https://befika-github-io.vercel.app/api/chat';
     const chat = document.getElementById('chat');
     const chatLog = document.getElementById('chat-log');
     const suggest = document.getElementById('chat-suggest');
@@ -553,12 +731,7 @@
       const pending = addMsg('model', '');
       pending.innerHTML = '<span class="typing" aria-label="Thinking"><i></i><i></i><i></i></span>';
 
-      const data = await fetch(CHAT_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: turns.slice(-10) }),
-      }).then(r => r.json()).catch(() => ({}));
-
+      const data = await callChat(turns.slice(-10));
       if (data.reply) {
         pending.textContent = data.reply;
         turns.push({ role: 'model', text: data.reply });
