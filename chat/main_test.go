@@ -49,6 +49,17 @@ func TestChat(t *testing.T) {
 	if rec.Header().Get("Access-Control-Allow-Origin") != allowedOrigin {
 		t.Error("missing CORS header for allowed origin")
 	}
+	if !strings.Contains(rec.Body.String(), `"server_ms"`) || !strings.Contains(rec.Body.String(), `"model_ms"`) {
+		t.Errorf("missing trace: %s", rec.Body)
+	}
+
+	health := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/api/health", nil)
+	req.Header.Set("Origin", allowedOrigin)
+	handleHealth(health, req)
+	if health.Code != 200 || !strings.Contains(health.Body.String(), `"ok":true`) || health.Header().Get("Access-Control-Allow-Origin") != allowedOrigin {
+		t.Errorf("health: %d %s", health.Code, health.Body)
+	}
 	if gotKey != "test-key" || gotPath != "/models/"+model+":generateContent" {
 		t.Errorf("upstream got key %q path %q", gotKey, gotPath)
 	}

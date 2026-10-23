@@ -55,18 +55,30 @@ func main() {
 		log.Print("warning: GEMINI_API_KEY is not set; /api/chat will answer 500")
 	}
 	http.HandleFunc("/api/chat", handleChat)
+	http.HandleFunc("/api/health", handleHealth)
 	port := envOr("PORT", "3000")
 	log.Printf("chat listening on :%s (model %s)", port, model)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
-func handleChat(w http.ResponseWriter, r *http.Request) {
+func cors(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("Origin") == allowedOrigin {
 		w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		w.Header().Set("Access-Control-Max-Age", "86400")
 	}
 	w.Header().Set("Vary", "Origin")
+}
+
+// handleHealth backs the live status on the portfolio; it never calls Gemini.
+func handleHealth(w http.ResponseWriter, r *http.Request) {
+	cors(w, r)
+	writeJSON(w, http.StatusOK, map[string]any{"ok": apiKey != "", "model": model})
+}
+
+func handleChat(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	cors(w, r)
 
 	switch r.Method {
 	case http.MethodOptions:
@@ -100,7 +112,9 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	modelStart := time.Now()
 	reply, err := ask(r.Context(), msgs)
+	modelMs := time.Since(modelStart).Milliseconds()
 	switch {
 	case errors.Is(err, errBusy):
 		writeError(w, http.StatusServiceUnavailable, "The assistant is busy right now. Please try again in a minute.")
@@ -108,7 +122,11 @@ func handleChat(w http.ResponseWriter, r *http.Request) {
 		log.Printf("gemini: %v", err)
 		writeError(w, http.StatusBadGateway, "The assistant is unavailable right now.")
 	default:
-		writeJSON(w, http.StatusOK, map[string]string{"reply": reply})
+		writeJSON(w, http.StatusOK, map[string]any{
+			"reply": reply,
+			// timings drive the trace waterfall on the portfolio
+			"trace": map[string]any{"model": model, "model_ms": modelMs, "server_ms": time.Since(start).Milliseconds()},
+		})
 	}
 }
 
